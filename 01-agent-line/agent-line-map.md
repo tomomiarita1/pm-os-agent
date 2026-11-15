@@ -10,26 +10,35 @@ List every discrete decision or action in your agent's workflow, then score each
 
 | Decision / action | Reversibility (H/M/L) | Blast radius (H/M/L) | Measurability (H/M/L) | Above / Below | HITL? |
 |---|---|---|---|---|---|
-| _Pull project state + recent GitHub/Jira activity_ | H | L | H | Below | · |
-| _Draft the weekly leadership status update_ | H | M | M | Below | spot-check |
-| _Propose next sprint's stories from the PRD (within cap)_ | M | M | M | Below | spot-check |
-| _Post the update to a channel / commit a ship date_ | L | H | M | Above | required |
-| _Mark a launch gate green / merge or close a ticket_ | L | H | M | Above | required |
-| _…_ | | | | | |
+| Pull project state and activity | H | L | H | Below | no |
+| Decide relevant context | M | L | H | Below | yes |
+| Draft the update | H | L | H | Below | no |
+| Decide tone and commitment level | L | H | M | Above | no |
+| Flag at-risk or escalation | H | L | H | Below | no |
+| Choose what to escalate | M | H | M | Above | no |
+| Propose a story batch (capped) | H | M | M | Below | yes |
+| Post an update, or approve a company-wide one | L | H | L | Above | no |
 
 ## Agent anatomy (sketch)
 
-- **Model:** _your default fast model + when you escalate to a frontier model, and why_
-- **Tools:** _project + activity lookup (read) · past-update search · roadmap · team norms · story proposal (capped) …_
-- **Memory:** _what persists across runs (roadmap, decisions, norms) vs. purged_
+- **Model:** gpt-4o-mini for every run. No frontier model, because no action requires one. Above-the-line calls stay with the human.
+- **Tools:** project state, activity, past updates, roadmap, team norms, and a capped story proposal. No post, create, or merge. Nothing critical is auto-published to a wide audience.
+- **Memory:** roadmap, decision log, and team norms persist. Drafts and flags do not, because they have no use in a later run.
 - **Loop:** _placeholder, defined in M2 loop-spec.md_
 - **Bounds:** _placeholder, defined in M5 bounds-and-evals.md_
 - **Evals:** _placeholder, defined in M5 bounds-and-evals.md_
 
 ## The golden rule, applied
 
-_One sentence per above-the-line decision: why it stays human (which of reversibility / blast radius / measurability failed)._
+- Pull project state and activity sits below the line because the three scores contribute a clean signal for agent automation, deciding factor: all three.
+- Decide relevant context sits below the line with HITL because it is not exposed to a wide audience and is used by a small group, deciding factor: blast radius.
+- Draft the update sits below the line because it is easy to replace, the blast is low, and the claims are checkable, deciding factor: all three.
+- Decide tone and commitment level sits above the line because this result cannot be reversed, deciding factor: reversibility.
+- Flag at-risk or escalation sits below the line because the flag can be ignored, it is not exposed to a wide audience, and you can tell how effective it is, deciding factor: all three.
+- Choose what to escalate sits above the line because the escalation is blasted to a wide audience, deciding factor: blast radius.
+- Propose a story batch (capped) sits below the line with HITL because you want to review it before the story is committed as a ticket, deciding factor: blast radius.
+- Post an update, or approve a company-wide one, sits above the line because it is exposed to a company-wide audience, deciding factor: blast radius.
 
 ## Hardest call
 
-_Your toughest "above vs below" decision and how you resolved it. (Share this in `#cohort-channel`.)_
+Choose what to escalate. I went back and forth on above versus below because the action was vague. Blast radius settled it above the line, because it is hard to identify the size of the audience from the sentence.
