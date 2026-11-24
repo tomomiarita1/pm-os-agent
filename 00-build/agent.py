@@ -155,6 +155,8 @@ def run(which: str = "happy") -> None:
     source_log: list[str] = [task["body"]]
     revisions = 0
     last_draft = ""
+    failed_pulls = 0
+    pull_tools = {"get_project", "get_activity"}
 
     for step in range(1, MAX_ITERATIONS + 1):
         if bounds.over_cap():
@@ -178,6 +180,18 @@ def run(which: str = "happy") -> None:
                 source_log.append(f"{fn}({args}) -> {json.dumps(result)}")
                 print(f"\n[step {step}] TOOL {fn}({args})")
                 print(f"          -> {json.dumps(result)[:300]}")
+                if fn in pull_tools and isinstance(result, dict) and result.get("error"):
+                    failed_pulls += 1
+                    print(f"          STUCK CHECK, failed pull {failed_pulls}/3 "
+                          f"({fn}: {result.get('error')})")
+                    if failed_pulls >= 3:
+                        reason = ("stuck: project state or activity still missing "
+                                  "after 3 failed pulls. Stopped and logged. "
+                                  "Did not invent numbers.")
+                        banner("STUCK, " + reason)
+                        emit_deliverable(which, last_draft, accepted=False,
+                                         reason=reason, cost=bounds.cost)
+                        return
                 messages.append({"role": "tool", "tool_call_id": call.id,
                                  "content": json.dumps(result)})
             continue

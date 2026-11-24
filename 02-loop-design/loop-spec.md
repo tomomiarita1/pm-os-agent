@@ -9,37 +9,46 @@
 
 ## 1. Trigger & loop type
 
-**Chosen type:** _heartbeat · cron · hook · goal_
+**Chosen type:** hook
 
-_Why this type? (e.g. a Monday-morning cron that assembles the weekly update, plus a hook on a new PRD to propose stories.)_
+When new tasks come in, that starts the sequence. We don't expect the tasks to come frequently, but a cron job may not be soon enough, so using the new task as it comes in is the better trigger.
+
+**Ruled out:**
+- **Heartbeat:** we don't expect new tasks frequently, so a heartbeat every several minutes would create wasted runs.
+- **Cron:** a cron job may not be soon enough when a new task arrives.
+- **Goal:** the action can end in one shot at the time of the new task.
+
+**Idempotency:** use the message ID on the task description so the same task does not trigger the sequence twice.
 
 ## 2. Goal / definition of done
 
-_What outcome is this loop responsible for? For a goal loop, what validation says "done"? (e.g. a status update grounded in real activity, queued for review, nothing posted.)_
+The update is written and queued for approval, and any story batch is inside the cap and queued too. Cortex never posts.
+
+We want to avoid any update draft, story, or post being done without human review, because they may not be easily reversible.
 
 ## 3. Stop conditions
 
 | Condition | What it looks like | What happens |
 |---|---|---|
-| **Success** | _…_ | _…_ |
-| **Stuck / give up** | _…_ | _escalate / log / halt_ |
-| **Escalate to human** | _…_ | _HITL checkpoint (from agent-line-map)_ |
+| **Success** | The update is queued for approval, and any story batch is inside the cap and queued too. Nothing is posted. | Stop. Leave the queue for a human. |
+| **Stuck / give up** | Project state or activity is still missing after 3 failed pulls. | Stop and log. Do not invent numbers. The pull limit avoids an infinite loop. |
+| **Escalate to human** | The draft would commit a public date or tone, touch an embargoed project, or the story batch is over the cap. | Hand off at the human checkpoint. Do not post, do not commit the date or tone, and do not split the batch to get under the cap. |
 
 ## 4. State
 
-_What persists across iterations, and what's the scope? (e.g. per-project context and last week's update; no cross-project confidential leakage.)_
+Persist the final results: the roadmap, the decision log, team norms, and the message IDs already seen. Scope is per project, so one project's confidential notes do not leak into another.
+
+Do not persist drafts or flags. They are just a step toward the actual goal.
 
 ## 5. The five things a loop can lean on
 
-_`state` is always-on. `connectors` only if you already have one wired (e.g. a Jira key or Google MCP), otherwise just note it as a plan. `skills`, `subagents`, `work tree` scale with autonomy; "not needed yet, because…" is a valid answer._
-
 | Component | For Cortex |
 |---|---|
-| **Work tree** (isolated workspace per run, a git worktree) | _…_ |
-| **Skills** (reusable capabilities) | _…_ |
-| **Plugins / connectors** (tools & access, optional if you don't have one yet) | _…_ |
-| **Subagents** (independent check when the loop can't grade itself) | _placeholder → M3 orchestration-map.md_ |
-| **State tracking** | _…_ |
+| **Work tree** (isolated workspace per run, a git worktree) | Not needed yet, because we have not decided whether to do a parallel run. |
+| **Skills** (reusable capabilities) | Not needed yet, because the tool is not complex enough. |
+| **Plugins / connectors** (tools & access, optional if you don't have one yet) | A plan, not wired. We are creating the tool on fixtures. Once it is solid, we hook it to the actual data source. |
+| **Subagents** (independent check when the loop can't grade itself) | Not needed yet, because we are not asking the tool to do an independent check. |
+| **State tracking** | Roadmap, decision log, team norms, and seen message IDs persist per project. Drafts and flags do not. |
 
 > Context plan (M4) and the hand-off to bounds & evals (M5) come in later modules, you'll add them to their own deliverables then, not here.
 
