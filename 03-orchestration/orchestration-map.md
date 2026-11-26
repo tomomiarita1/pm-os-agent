@@ -80,4 +80,4 @@ Share the evidence, isolate the reasoning. Both see the pulled project state, ac
 
 ## 7. Cost & latency budget
 
-_Coordination has a price. Rough token/latency cost of the fleet vs a single agent. (Forward-link to M5 bounds.)_
+A clean draft costs one critic call, then it is queued. A traceable-figures failure can be redrafted twice, which is three critic calls, then the PM gets the draft and the reasons. The second redraft may remove the hallucination. Queue cap, a forbidden commitment, or an embargo leak costs one critic call and escalates immediately, with no redraft. The PM does not see a draft until those calls finish.
