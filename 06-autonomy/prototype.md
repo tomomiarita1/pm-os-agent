@@ -23,7 +23,7 @@ Real screenshots of *your* Cortex running. These are the `00-build/CORTEX-ANATOM
 |---|---|---|---|
 | 1 | _[img]_ | happy-path run: a real drafted update + the HITL checkpoint (queued, not posted) | M2 |
 | 2 | transcript below | the critic rejecting a bad draft (revise, then revision-cap escalate) | M3 |
-| 3 | _[img]_ | a grounded update citing pulled activity + a caught hallucination | M4 |
+| 3 | transcript below | a grounded update citing pulled activity + a caught hallucination | M4 |
 | 4 | _[img]_ | jailbreak refused + escalated | M5 |
 | 5 | _[img]_ | an iteration/cost/queue bound halting a runaway | M5 |
 | 6 | _[img]_ | end-to-end run | M6 |
@@ -47,6 +47,36 @@ CRITIC, independent validation
 
 REVISION CAP hit (2). Escalating to a human instead of looping.
 Why it was held: validator rejected 2x (revision cap)
+```
+
+## M4 grounding probe
+
+### (a) Grounded answer
+
+Happy path, `python agent.py`. The draft cites data that `get_activity` pulled for P-NORTH. The task brief is the long-context ask: write the Northstar update, propose stories, and do not send it until a person has looked. Orbit and Pulsar are not in the draft. The critic still held it on status color, and the revision cap escalated to a human. Nothing was posted.
+
+```text
+- #820: Day-2 milestone email (merged on 2026-07-02)
+- #823: Empty-state guidance copy (merged on 2026-07-03)
+- #825: Contextual tips A/B needs analytics review
+- Activation Rate: 43% (Prior: 41%)
+DONE: queued for your review
+```
+
+### (b) Withheld source, hallucination caught
+
+`python agent.py missing-data`. P-HALO is not in the system. `get_project` and `get_activity` returned `project_not_found`. The first draft filled the hole with a real Northstar update (43%, #820, #823). The critic rejected that substitution. The last draft does not invent a GA date. It escalates.
+
+```text
+[step 1] TOOL get_activity({'project_id': 'P-HALO'})
+         -> {"error": "project_not_found", "project_id": "P-HALO"}
+
+CRITIC: The project P-HALO does not exist in the system, and there is no basis
+for mentioning it. The output provides a status update for Project North that
+is unrelated to the request.
+
+ESCALATE: Project P-HALO does not exist in the system, preventing the creation
+of an accurate status update. A human must review the situation.
 ```
 
 ## How to run it
